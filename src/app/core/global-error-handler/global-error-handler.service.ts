@@ -1,10 +1,34 @@
-import { Injectable } from '@angular/core';
+import { ErrorHandler, Injectable, Injector } from '@angular/core';
+import { LogService } from '@app/core/log/log.service';
+import * as StackTrace from 'stacktrace-js';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class GlobalErrorHandlerService {
+@Injectable()
+export class GlobalErrorHandler extends ErrorHandler {
+  constructor(private injector: Injector) {
+    super();
+  }
 
-constructor() { }
+  public handleError(error) {
+    const logService: LogService = this.injector.get(LogService);
+    const message = error.message ? error.message : error.toString();
 
+    if (error.status) {
+      error = new Error(message);
+    }
+
+    StackTrace.fromError(error).then((stackframes) => {
+      const stackString = stackframes
+        .splice(0, 10)
+        .map(function(sf) {
+          return sf.toString();
+        })
+        .toString();
+
+      const errorTraceStr = `Error message: ${message}. Stack trace: ${stackString}`;
+
+      logService.logError(errorTraceStr);
+
+      throw error;
+    });
+  }
 }
