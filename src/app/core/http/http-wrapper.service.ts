@@ -12,10 +12,13 @@ import {
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams, HttpRequest } from '@angular/common/http';
+import { LogService } from '@app/core/log/log.service';
+import * as moment from 'moment';
+import { Moment } from 'moment';
 
 @Injectable()
 export class HttpWrapperService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private logService: LogService) {}
 
   get(url: string, options?: any): Observable<Response> {
     console.log('option in get', options);
@@ -34,9 +37,17 @@ export class HttpWrapperService {
     return this.request('DELETE', url, options);
   }
 
+  private logTime(startMoment: Moment, url: string, method: string) {
+    const requestDuration = moment().diff(startMoment, 'milliseconds');
+
+    this.logService.logHttpInfo(`HTTP ${method}`, requestDuration, url);
+  }
+
   private request(method: string, url: string, options?: any) {
     console.log('options', options);
     return Observable.create((observer: any) => {
+      const requestBeginTime = moment();
+      this.logTime(requestBeginTime, `${url}`, method),
       this.http.request(new HttpRequest(method, url, options)).subscribe(
         (response) => {
           observer.next(response);
