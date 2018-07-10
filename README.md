@@ -1,5 +1,7 @@
 # AngularLoggingDemo
 
+Demo project of logging with Angular used in my [logging blog post](https://christianlydemann.com/logging-with-angular/).
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.8.
 
 ## Development server
